@@ -1,5 +1,8 @@
 Welcome to Simulated Tile Logic!
 
+To begin, run the .bat file. If it does not run, edit the file and delete the word 'python'
+Do NOT delete anything else.
+
 To place a tile, use the left mouse button.
 To delete, use the right.
 To pan/zoom, use the middle.
