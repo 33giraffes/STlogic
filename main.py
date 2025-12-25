@@ -1,5 +1,3 @@
-#=By=33giraffes====================================================================================================
-
 import pygame
 from copy import deepcopy as dc
 
@@ -39,26 +37,29 @@ def checksq(sq):
 	return ((s1[2], s2[2], s3[2], s4[2]), (s1[3], s2[3], s3[3], s4[3]), (s1[4], s2[4], s3[4], s4[4]))
 
 TYPES = {
-	#=Empty=#
+	#Empty#
 	0: (15, 15, 15),
 
-	#=Wire=#
+	#Wire#
 	1: (255, 255, 255),
 
-	#=Split=#
+	#Split#
 	2: (200, 200, 200),
 
-	#=Not=#
+	#Not#
 	3: (255, 0, 0),
 
-	#=And=#
+	#And#
 	4: (0, 90, 255),
 
-	#=Input=#
+	#Input#
 	5: (0, 255, 0),
 
-	#=Output=#
-	6: (157, 0, 255)
+	#Output#
+	6: (157, 0, 255),
+
+	#Displacer#
+	7: (255, 128, 32)
 }
 
 Z = []
@@ -282,6 +283,12 @@ while running:
 									inputs[i] = 1
 							case 6:
 								pass
+							case 7:
+								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (1,3):
+									inputs[i] = 1
+
+								elif (rcvdirs[i] + 1) % 4 == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (2,3):
+									inputs[i] = 1
 							case _: 
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 1:
 									inputs[i] = 1
@@ -298,6 +305,49 @@ while running:
 				#=Input=#
 				case 5:
 					pass
+
+				#=Bridge=#
+				case 7:
+					sq[3] = 0
+
+					dirs2rcv = ((dir - 2) % 4, (dir - 1) % 4)
+					rcvtyps = (nbrs[0][dirs2rcv[0]], nbrs[0][dirs2rcv[1]])
+					rcvpwrs = (nbrs[1][dirs2rcv[0]], nbrs[1][dirs2rcv[1]])
+					rcvdirs = (nbrs[2][dirs2rcv[0]], nbrs[2][dirs2rcv[1]])
+
+					inputs = [0, 0]
+
+					for i in (0,1):
+						match rcvtyps[i]:
+							case 2:
+								if rcvdirs[i] != dirs2rcv[i] and rcvpwrs[i] == 1:
+									inputs[i] = 1
+							case 3:
+								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 0:
+									if CTRL:
+										print(i)
+									inputs[i] = 1
+							case 6:
+								pass
+							case 7:
+								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (1,3):
+									inputs[i] = 1
+
+								elif (rcvdirs[i] + 1) % 4 == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (2,3):
+									inputs[i] = 1
+							case _: 
+								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 1:
+									inputs[i] = 1
+
+					match tuple(inputs):
+						case (0, 0):
+							sq[3] = 0
+						case (0, 1):
+							sq[3] = 2
+						case (1, 0):
+							sq[3] = 1
+						case (1, 1):
+							sq[3] = 3
 
 				#=Other=Tiles=#
 				case _:
@@ -316,6 +366,11 @@ while running:
 								sq[3] = 1
 						case 6:
 							pass
+						case 7:
+							if rcvdir == dir and rcvpwr in (1,3):
+								sq[3] = 1
+							elif (rcvdir + 1) % 4 == dir and rcvpwr in (2,3):
+								sq[3] = 1
 						case _: 
 							if rcvdir == dir and rcvpwr == 1:
 								sq[3] = 1
