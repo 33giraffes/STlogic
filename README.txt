@@ -12,13 +12,14 @@ To rotate the placement, use the Q and E keys; Q for c-clockwise, E for clockwis
 To run or stop running the simulation, press space. 
 You will be unable to place or destroy tiles when the sim is running.
 
-STlogic is a logic sim with 6 tiles, which can be selected with the number keys:
+STlogic is a logic sim with 7 tiles, which can be selected with the number keys:
 1) Wire     This is the simplest; when it receives input, it outputs on the opposite side.
 2) Split    When it receives input, it outputs on the other three sides.
 3) Not      When it does not receive input, it outputs, and vice versa.
 4) And      When it receives two inputs, it outputs; otherwise, it does not.
 5) Input    When clicked and the sim is running, it outputs until it is clicked again.
 6) Output   This can only turn on and does not output, contrary to its name.
+7) Bridge   Acts like a wire in two directions without interference.
 
 To undo a placement/deletion/running, press CTRL + Z
 To redo a placement/deletion/running, press CTRL + Y
