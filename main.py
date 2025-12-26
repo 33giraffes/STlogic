@@ -496,6 +496,8 @@ while running:
 					C.append(tuple(d[:2]))
 
 				G = dc(loadedGrid)
+				Z.clear()
+				Y.clear()
 
 			else:
 				print(f'(!) File saves\\{nme}.txt does not exist')
@@ -510,3 +512,4 @@ while running:
 pygame.quit()
 
 #==================================================================================================================
+
