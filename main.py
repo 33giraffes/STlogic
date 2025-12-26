@@ -1,11 +1,14 @@
 import pygame
+import os
 from copy import deepcopy as dc
 
 pygame.init()
 
 screen = pygame.display.set_mode((600, 500), pygame.RESIZABLE)
 # Simulated Tile logic
-pygame.display.set_caption("STlogic")
+pygame.display.set_caption('STlogic')
+
+font = pygame.font.SysFont('consolas', 30)
 
 def get_image(png):
 	return pygame.image.load(f'assets\\{png}.png').convert_alpha()
@@ -91,6 +94,10 @@ selrec = ()
 
 PLAY = False
 CTRL = False
+SAVE = False
+LOAD = False
+
+currSave = None
 
 running = True
 while running:
@@ -138,7 +145,7 @@ while running:
 				if z[0] == 0:
 					Y.append((0, tuple(z[1]), G[z[1][0]][z[1][1]]))
 
-					print(z)
+					#print(z)
 					G[z[1][0]][z[1][1]] = z[2]
 
 					if C.count((z[1][0], z[1][1])) == 0:
@@ -175,6 +182,17 @@ while running:
 
 					G.clear()
 					G.extend(y[1])
+
+			#=Save=======================================#
+
+			if event.key == ord('s') and CTRL and not PLAY:
+				SAVE = True
+
+			#=Load=======================================#
+
+			if event.key == ord('o') and CTRL and not PLAY:
+				LOAD = True
+
 			#============================================#
 
 		if event.type == pygame.KEYUP:
@@ -279,8 +297,6 @@ while running:
 									inputs[i] = 1
 							case 4:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 0:
-									if CTRL:
-										print(i)
 									inputs[i] = 1
 							case 7:
 								pass
@@ -325,8 +341,6 @@ while running:
 									inputs[i] = 1
 							case 4:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 0:
-									if CTRL:
-										print(i)
 									inputs[i] = 1
 							case 7:
 								pass
@@ -415,9 +429,83 @@ while running:
 				spr = pygame.transform.rotate(spr, 90 * G[selsq[0]][selsq[1]][4])
 				screen.blit(spr, selrec)
 
+#=Save/Load========================================================================================================
+
+	if SAVE:
+		if currSave == None:
+			txt = font.render('New Save: Check terminal', True, (255, 255, 255))
+			screen.blit(txt, (10, 40))
+			pygame.display.flip()
+			nme = input('\nName of save (leave empty to cancel): ')
+
+			if os.path.isfile(f'saves\\{nme}.txt'):
+				print(f'(!) File \'saves\\{nme}.txt\' already exists')
+
+		else:
+			nme = currSave
+
+		if nme != '':
+			newSave = open(f'saves\\{nme}.txt', 'w')
+
+			data = f'{len(G)}#{len(G[0])}'
+			for coord in C:
+				data += '\n'
+
+				tl = G[coord[0]][coord[1]]
+				data += f'{tl[0]} {tl[1]} {tl[2]} {tl[3]} {tl[4]}'
+
+			newSave.write(data)
+			newSave.close()
+			currSave = nme
+			
+		pygame.event.clear()
+		SAVE = False
+
+	if LOAD:
+		txt = font.render('Check terminal', True, (255, 255, 255))
+		screen.blit(txt, (10, 40))
+		pygame.display.flip()
+		nme = input('\nName of file to load (leave empty to cancel): ')
+
+		if nme != '':
+			if os.path.isfile(f'saves\\{nme}.txt'):
+				C.clear()
+
+				currSave = nme
+
+				loadFrom = open(f'saves\\{nme}.txt', 'r')
+				data = loadFrom.read().split('\n')
+				loadFrom.close()
+
+				dim = data[0].split('#')
+				for i in range(2):
+					dim[i] = int(dim[i])
+
+				C.clear()
+				loadedGrid = []
+				for x in range(dim[0]):
+					loadedGrid.append([])
+					for y in range(dim[1]):
+						loadedGrid[x].append([x, y, 0, 0, 0])
+
+				for ln in data[1:]:
+					d = ln.split(' ')
+					for i in range(len(d)):
+						d[i] = int(d[i])
+					loadedGrid[d[0]][d[1]] = d
+					C.append(tuple(d[:2]))
+
+				G = dc(loadedGrid)
+
+			else:
+				print(f'(!) File saves\\{nme}.txt does not exist')
+
+		pygame.event.clear()
+		LOAD = False
+
 	pygame.display.flip()
 
-#=End=#
+#=End==============================================================================================================
 
 pygame.quit()
 
