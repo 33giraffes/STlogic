@@ -45,21 +45,21 @@ TYPES = {
 
 	#Split#
 	2: (200, 200, 200),
+	
+	#Bridge#
+	3: (255, 128, 32),
 
 	#Not#
-	3: (255, 0, 0),
+	4: (255, 0, 0),
 
 	#And#
-	4: (0, 90, 255),
+	5: (0, 90, 255),
 
 	#Input#
-	5: (0, 255, 0),
+	6: (0, 255, 0),
 
 	#Output#
-	6: (157, 0, 255),
-
-	#Displacer#
-	7: (255, 128, 32)
+	7: (157, 0, 255),
 }
 
 Z = []
@@ -187,8 +187,9 @@ while running:
 
 			if event.button == 1:
 				if len(selsq) > 0:
+					#=Activate=Input=Tiles=#
 					if PLAY:
-						if G[selsq[0]][selsq[1]][2] == 5:
+						if G[selsq[0]][selsq[1]][2] == 6:
 							G[selsq[0]][selsq[1]][3] = int(not G[selsq[0]][selsq[1]][3])
 					else:
 						if G[selsq[0]][selsq[1]][2] != seltype:
@@ -261,7 +262,7 @@ while running:
 
 			match sq[2]:
 				#=And=#
-				case 4:
+				case 5:
 					sq[3] = 0
 
 					dirs2rcv = ((dir - 1) % 4, (dir + 1) % 4)
@@ -276,14 +277,14 @@ while running:
 							case 2:
 								if rcvdirs[i] != dirs2rcv[i] and rcvpwrs[i] == 1:
 									inputs[i] = 1
-							case 3:
+							case 4:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 0:
 									if CTRL:
 										print(i)
 									inputs[i] = 1
-							case 6:
-								pass
 							case 7:
+								pass
+							case 3:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (1,3):
 									inputs[i] = 1
 
@@ -303,11 +304,11 @@ while running:
 						case (1, 1):
 							sq[3] = 1
 				#=Input=#
-				case 5:
+				case 6:
 					pass
 
 				#=Bridge=#
-				case 7:
+				case 3:
 					sq[3] = 0
 
 					dirs2rcv = ((dir - 2) % 4, (dir - 1) % 4)
@@ -322,14 +323,14 @@ while running:
 							case 2:
 								if rcvdirs[i] != dirs2rcv[i] and rcvpwrs[i] == 1:
 									inputs[i] = 1
-							case 3:
+							case 4:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] == 0:
 									if CTRL:
 										print(i)
 									inputs[i] = 1
-							case 6:
-								pass
 							case 7:
+								pass
+							case 3:
 								if rcvdirs[i] == (dirs2rcv[i] + 2) % 4 and rcvpwrs[i] in (1,3):
 									inputs[i] = 1
 
@@ -361,12 +362,12 @@ while running:
 						case 2:
 							if rcvdir != dir2rcv and rcvpwr == 1:
 								sq[3] = 1
-						case 3:
+						case 4:
 							if rcvdir == dir and rcvpwr == 0:
 								sq[3] = 1
-						case 6:
-							pass
 						case 7:
+							pass
+						case 3:
 							if rcvdir == dir and rcvpwr in (1,3):
 								sq[3] = 1
 							elif (rcvdir + 1) % 4 == dir and rcvpwr in (2,3):
@@ -409,7 +410,7 @@ while running:
 			spr.set_alpha(128)
 			screen.blit(spr, selrec)
 	else:
-		if len(selrec) > 0 and G[selsq[0]][selsq[1]][2] == 5:
+		if len(selrec) > 0 and G[selsq[0]][selsq[1]][2] == 6:
 				spr = pygame.transform.scale(get_image('input_mask').convert_alpha(), (selrec[2], selrec[3]))
 				spr = pygame.transform.rotate(spr, 90 * G[selsq[0]][selsq[1]][4])
 				screen.blit(spr, selrec)
