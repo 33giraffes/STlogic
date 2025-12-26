@@ -24,4 +24,11 @@ STlogic is a logic sim with 7 tiles, which can be selected with the number keys:
 To undo a placement/deletion/running, press CTRL + Z
 To redo a placement/deletion/running, press CTRL + Y
 
+To save your work, press CTRL + S, then type your preffered name into the terminal.
+To load a save, press CTRL + O, then type your saved name into the terminal.
+Once defining whtat save you are on, just press CTRL + S to save.
+
+Also, you can change the tile area of a save by going to the file and changing the 
+numbers either side the hash (#): width#height
+
 This took too long to make, so please show your support for this in any way possible.
