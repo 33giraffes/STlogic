@@ -70,16 +70,21 @@ Y = []
 
 N = []
 G = []
-for x in range(75):
+for x in range(50):
 	N.append([])
 	G.append([])
-	for y in range(75):
+	for y in range(50):
 		# x, y, type, on/off, rotation
 
 		N[x].append([x, y, 0, 0, 0])
 		G[x].append([x, y, 0, 0, 0])
 
+srf = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+srf.set_alpha(128)
+
 C = []
+S = []
+Scc = []
 
 CAM = [0,0,1]
 CAMtemp = [0,0]
@@ -94,15 +99,21 @@ selrec = ()
 
 PLAY = False
 CTRL = False
+SHIFT = False
 SAVE = False
 LOAD = False
 
 currSave = None
 
+#=Typical=Loop=====================================================================================================
+
 running = True
 while running:
 	og = [screen.get_size()[0] / 2, screen.get_size()[1] / 2]
 	mousepos = pygame.mouse.get_pos()
+
+	srf = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+	#srf.set_alpha(128)
 	
 	screen.fill((0, 0, 0))
 
@@ -116,7 +127,6 @@ while running:
 
 			if ord('1') <= event.key <= ord(str(len(TYPES.keys()) - 1)):
 				seltype = int(chr(event.key))
-		
 			if event.key == ord('q'):
 				R = (R + 1) % 4
 			if event.key == ord('e'):
@@ -124,17 +134,24 @@ while running:
 
 			#=Play=======================================#
 
-			if event.key == 32:
+			if event.key == 32 and not SHIFT:
 				PLAY = not PLAY
 
 				if PLAY:
 					g = dc(G)
 					Z.append((1, g))
+					Y.clear()
 
 			#=Ctrl=======================================#
 
 			if event.key == pygame.K_LCTRL:
 				CTRL = True
+
+			#=SHIFT======================================#
+
+			if event.key == pygame.K_LSHIFT and not PLAY:
+				SHIFT = not SHIFT
+				S.clear()
 
 			#=Undo=======================================#
 
@@ -193,6 +210,34 @@ while running:
 			if event.key == ord('o') and CTRL and not PLAY:
 				LOAD = True
 
+			#=Copy=======================================#
+
+			if event.key == ord('c') and CTRL and SHIFT and len(S) == 3:
+				Scc = dc(S[2])
+				#print(f'copied: {S[0]} to {S[1]}')#\n{Scc}')
+				S.clear()
+
+			#=Paste======================================#
+
+			if event.key == ord('v') and CTRL and SHIFT and len(Scc) * len(selsq) > 0:
+				Z.append((1, dc(G)))
+				Y.clear()
+
+				frosq = tuple(selsq)
+				if len(S) > 0:
+					frosq = S[0]
+
+				for x in range(len(Scc)):
+					for sq in Scc[x]:
+						if sq[2] != 0:
+							nsq = [frosq[0] + sq[0] - Scc[0][0][0], frosq[1] + sq[1] - Scc[0][0][1]]
+							nsq.extend(sq[2:])
+							G[nsq[0]][nsq[1]] = nsq.copy()
+							C.append(nsq[:2])
+				
+				#print(frosq, Scc, '\n\n')
+				S.clear()
+
 			#============================================#
 
 		if event.type == pygame.KEYUP:
@@ -201,14 +246,30 @@ while running:
 
 		if event.type == pygame.MOUSEBUTTONDOWN:
 
-			#=Place======================================#
+			#=Lclick=====================================#
 
 			if event.button == 1:
 				if len(selsq) > 0:
-					#=Activate=Input=Tiles=#
+					#=Activate=Inputs=#
 					if PLAY:
 						if G[selsq[0]][selsq[1]][2] == 6:
 							G[selsq[0]][selsq[1]][3] = int(not G[selsq[0]][selsq[1]][3])
+					#=Select=#
+					elif SHIFT:
+						if len(S) == 3:
+							S.clear()
+
+						S.append(tuple(selsq[:2]))
+						if len(S) == 2:
+							ltemp = []
+							for x in range(abs(S[0][0] - S[1][0]) + 1):
+								ltemp.append([])
+								for y in range(abs(S[0][1] - S[1][1]) + 1):
+									ltemp[x].append(G[x + min(S[0][0], S[1][0])][y + min(S[0][1], S[1][1])])
+							S.append(ltemp)
+
+						#print(S)
+					#=Place=#
 					else:
 						if G[selsq[0]][selsq[1]][2] != seltype:
 							Z.append((0, tuple(selsq), dc(G[selsq[0]][selsq[1]])))
@@ -220,6 +281,8 @@ while running:
 							C.append((selsq[0],selsq[1]))
 
 						Y.clear()
+				elif SHIFT:
+					S.clear()
 
 			#=Pan========================================#
 
@@ -231,7 +294,7 @@ while running:
 				
 				moveCAM = True
 
-			#=Break======================================#
+			#=Rclick=====================================#
 
 			if event.button == 3:
 				if len(selsq) > 0 and not PLAY:
@@ -257,6 +320,8 @@ while running:
 			if event.button == 5:
 				if CAM[2] > .2:
 					CAM[2] -= .1
+
+			#============================================#
 
 		if event.type == pygame.MOUSEBUTTONUP:
 			if event.button == 2:
@@ -414,7 +479,35 @@ while running:
 			if sq[2] > 0:
 				screen.blit(spr, rec)
 	
-	if not PLAY:
+	if PLAY:
+		if len(selrec) > 0 and G[selsq[0]][selsq[1]][2] == 6:
+			spr = pygame.transform.scale(get_image('input_mask').convert_alpha(), (selrec[2], selrec[3]))
+			spr = pygame.transform.rotate(spr, 90 * G[selsq[0]][selsq[1]][4])
+			screen.blit(spr, selrec)
+	elif SHIFT:
+		srf.fill((0, 0, 0, 0))
+		match len(S):
+			case 0:
+				if len(selrec) > 0:
+					pygame.draw.rect(srf, (255, 255, 255, 32), selrec)
+			case 1:
+				if len(selrec) > 0:
+					m0 = min(S[0][0], selsq[0])
+					m1 = min(S[0][1], selsq[1])
+					newrec = ((10 * m0 + CAM[0]) * CAM[2] + og[0], (10 * m1 + CAM[1]) * CAM[2] + og[1], (10 * (abs(S[0][0] - selsq[0]) + 1)) * CAM[2], (10 * (abs(S[0][1] - selsq[1]) + 1)) * CAM[2])
+					pygame.draw.rect(srf, (255, 255, 255, 32), newrec)
+				else:
+					newrec = ((10 * S[0][0] + CAM[0]) * CAM[2] + og[0], (10 * S[0][1] + CAM[1]) * CAM[2] + og[1], 10 * CAM[2], 10 * CAM[2])
+					pygame.draw.rect(srf, (255, 255, 255, 32), newrec)
+			case 3:
+				m0 = min(S[0][0], S[1][0])
+				m1 = min(S[0][1], S[1][1])
+				newrec = ((10 * m0 + CAM[0]) * CAM[2] + og[0], (10 * m1 + CAM[1]) * CAM[2] + og[1], (10 * (abs(S[0][0] - S[1][0]) + 1)) * CAM[2], (10 * (abs(S[0][1] - S[1][1]) + 1)) * CAM[2])
+				pygame.draw.rect(srf, (255, 255, 255, 64), newrec)
+
+		screen.blit(srf, (0, 0))
+
+	else:
 		pygame.draw.rect(screen, TYPES[seltype], (10, 10, 15, 15))
 
 		#=hovering=tile=#
@@ -423,11 +516,6 @@ while running:
 			spr = pygame.transform.scale(img(this_sq), (selrec[2], selrec[3]))
 			spr.set_alpha(128)
 			screen.blit(spr, selrec)
-	else:
-		if len(selrec) > 0 and G[selsq[0]][selsq[1]][2] == 6:
-				spr = pygame.transform.scale(get_image('input_mask').convert_alpha(), (selrec[2], selrec[3]))
-				spr = pygame.transform.rotate(spr, 90 * G[selsq[0]][selsq[1]][4])
-				screen.blit(spr, selrec)
 
 #=Save/Load========================================================================================================
 
@@ -462,7 +550,7 @@ while running:
 		SAVE = False
 
 	if LOAD:
-		txt = font.render('Check terminal', True, (255, 255, 255))
+		txt = font.render('Load: Check terminal', True, (255, 255, 255))
 		screen.blit(txt, (10, 40))
 		pygame.display.flip()
 		nme = input('\nName of file to load (leave empty to cancel): ')
@@ -496,8 +584,6 @@ while running:
 					C.append(tuple(d[:2]))
 
 				G = dc(loadedGrid)
-				Z.clear()
-				Y.clear()
 
 			else:
 				print(f'(!) File saves\\{nme}.txt does not exist')
@@ -506,10 +592,10 @@ while running:
 		LOAD = False
 
 	pygame.display.flip()
+	del srf
 
 #=End==============================================================================================================
 
 pygame.quit()
 
 #==================================================================================================================
-
