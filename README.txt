@@ -31,4 +31,10 @@ Once defining whtat save you are on, just press CTRL + S to save.
 Also, you can change the tile area of a save by going to the file and changing the 
 numbers either side the hash (#): width#height
 
-This took too long to make, so please show your support for this in any way possible.
+To Copy/Paste, press Left Shift to enter/escape Selection mode. 
+Click once to set one corner of the selection box, click again to set the other.
+Press CTRL + C to copy selection box contents. 
+Press CTRL + V to paste copied selection to the mouse, starting at the top-left corner.
+You must be in selection mode to paste.
+
+P.S. This took too long to make, so please show your support for this in any way possible.
