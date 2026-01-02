@@ -127,10 +127,38 @@ while running:
 
 			if ord('1') <= event.key <= ord(str(len(TYPES.keys()) - 1)):
 				seltype = int(chr(event.key))
+
+			#=Rotate====================================#
+
+			#=c-clockwise=#
 			if event.key == ord('q'):
-				R = (R + 1) % 4
+				if SHIFT:
+					if len(Scc) > 0:
+						rotScc = [list(row[::-1]) for row in zip(*Scc)]
+
+						for r in rotScc:
+							for i in r:
+								i[4] = (i[4] + 1) % 4
+
+						Scc = dc(rotScc)
+				elif not PLAY:
+					R = (R + 1) % 4
+
+			#==clockwise==#
 			if event.key == ord('e'):
-				R = (R - 1) % 4
+				if SHIFT:
+					if len(Scc) > 0:
+						rotScc = list(zip(*Scc))[::-1]
+						rotScc = [list(row) for row in rotScc]
+
+						for r in rotScc:
+							for i in r:
+								i[4] = (i[4] - 1) % 4
+
+						print(Scc, '\n', rotScc)
+						Scc = dc(rotScc)
+				elif not PLAY:
+					R = (R - 1) % 4
 
 			#=Play=======================================#
 
@@ -210,6 +238,16 @@ while running:
 			if event.key == ord('o') and CTRL and not PLAY:
 				LOAD = True
 
+			#=Cut========================================#
+
+			if event.key == ord('x') and CTRL and SHIFT and len(S) == 3:
+				for x in G[S[0][0]:S[1][0] + 1]:
+					for sq in x[S[0][1]:S[1][1] + 1]:
+						sq[2] = 0
+
+				Scc = dc(S[2])
+				S.clear()
+
 			#=Copy=======================================#
 
 			if event.key == ord('c') and CTRL and SHIFT and len(S) == 3:
@@ -226,14 +264,22 @@ while running:
 				frosq = tuple(selsq)
 				if len(S) > 0:
 					frosq = S[0]
+				diff = (frosq[0] - Scc[0][0][0], frosq[1] - Scc[0][0][1])
 
-				for x in range(len(Scc)):
-					for sq in Scc[x]:
+				bx = 0
+				for x in enumerate(Scc):
+					by = 0
+					for sq in Scc[x[0]]:
 						if sq[2] != 0:
-							nsq = [frosq[0] + sq[0] - Scc[0][0][0], frosq[1] + sq[1] - Scc[0][0][1]]
+							nsq = [frosq[0] + bx, frosq[1] + by]
 							nsq.extend(sq[2:])
+							nsq[0] %= len(G)
+							nsq[1] %= len(G[0])
+
 							G[nsq[0]][nsq[1]] = nsq.copy()
 							C.append(nsq[:2])
+						by += 1
+					bx += 1
 				
 				#print(frosq, Scc, '\n\n')
 				S.clear()
@@ -486,6 +532,17 @@ while running:
 			screen.blit(spr, selrec)
 	elif SHIFT:
 		srf.fill((0, 0, 0, 0))
+
+		#=copied=tiles=display=#
+		if len(Scc) > 0:
+			for x in enumerate(Scc):
+				for y in enumerate(Scc[x[0]]):
+					w = 15
+					if len(Scc) * len(Scc[0]) > 25:
+						w = 75 / max(len(Scc), len(Scc[0]))
+					pygame.draw.rect(srf, TYPES[y[1][2]], (x[0] * w + 10, y[0] * w + 10, w, w))
+
+		#=selection=rect=#
 		match len(S):
 			case 0:
 				if len(selrec) > 0:
@@ -583,6 +640,8 @@ while running:
 					loadedGrid[d[0]][d[1]] = d
 					C.append(tuple(d[:2]))
 
+				Z.clear()
+				Y.clear()
 				G = dc(loadedGrid)
 
 			else:
