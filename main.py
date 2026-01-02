@@ -345,7 +345,7 @@ while running:
 			#=Rclick=====================================#
 
 			if event.button == 3:
-				if len(selsq) > 0 and not PLAY:
+				if len(selsq) > 0 and not PLAY and not SHIFT:
 					if G[selsq[0]][selsq[1]][2] != 0:
 						Z.append((0, tuple(selsq), dc(G[selsq[0]][selsq[1]])))
 
@@ -660,4 +660,5 @@ while running:
 pygame.quit()
 
 #==================================================================================================================
+
 
