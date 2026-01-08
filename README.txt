@@ -1,10 +1,14 @@
 Welcome to Simulated Tile Logic!
 
-To begin, run the .bat file. If it does not run, edit the file and delete the word 'python'
-Do NOT delete anything else.
+To begin, double-click the .py file.
+if it does not work, make a .bat file and paste this in:
+
+python STlogic.py
+
+then double click it.
+if it still does not work, delete the 'python'
 
 There are three modes:
-
 
 1) Build 
 
