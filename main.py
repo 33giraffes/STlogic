@@ -11,7 +11,14 @@ pygame.display.set_caption('STlogic')
 font = pygame.font.SysFont('consolas', 30)
 
 def get_image(png):
-	return pygame.image.load(f'assets\\{png}.png').convert_alpha()
+	target = os.path.dirname(os.path.abspath(__file__)) + '\\assets\\'
+
+	try:
+		return pygame.image.load(target + f'{png}.png')
+
+	except FileNotFoundError:
+		return pygame.image.load(target + 'err.png')
+
 pygame.display.set_icon(get_image('STlogic'))
 
 def img(sq):
@@ -241,8 +248,8 @@ while running:
 			#=Cut========================================#
 
 			if event.key == ord('x') and CTRL and SHIFT and len(S) == 3:
-				Z.append((1, dc(G))
-				
+				Z.append((1, dc(G)))
+
 				for x in G[S[0][0]:S[1][0] + 1]:
 					for sq in x[S[0][1]:S[1][1] + 1]:
 						sq[2] = 0
@@ -660,5 +667,3 @@ while running:
 pygame.quit()
 
 #==================================================================================================================
-
-
